@@ -126,7 +126,7 @@ app.get("/chats/:roomId",async(req,res)=>{
     res.json({
         messages
     })
-})
+});
 
 app.listen(5050, () => {
   console.log('HTTP backend server is running ');
