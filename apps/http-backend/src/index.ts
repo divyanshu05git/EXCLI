@@ -25,7 +25,7 @@ app.post("/signin",async (req,res)=>{
     })
 })
 
-app.get("/room",middleware,async (req,res)=>{
+app.post("/room",middleware,async (req,res)=>{
     res.json({
         roomId:"room123"
     })
