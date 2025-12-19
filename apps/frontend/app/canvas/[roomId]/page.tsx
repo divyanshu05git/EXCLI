@@ -36,7 +36,7 @@ export default function Canvas(){
     },[canvasRef])
     return (
         <div>
-            <canvas ref={canvasRef} width={500} height={500}></canvas>
+            <canvas ref={canvasRef} width={1080} height={1080}></canvas>
         </div>
     )
 }
