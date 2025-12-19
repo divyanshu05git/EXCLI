@@ -1,5 +1,5 @@
 
-export function initDraw(canvas){
+export function initDraw(canvas:HTMLCanvasElement){
 
     const ctx=canvas.getContext("2d");
             
