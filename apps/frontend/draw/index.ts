@@ -70,6 +70,7 @@ export async function initDraw(canvas:HTMLCanvasElement,roomId:string,socket:Web
 
     canvas.addEventListener("mousemove",(e)=>{
         if(clicked){
+            //first check what is being clicked 
             const width=e.clientX-startX;
             const height=e.clientY-startY;
             clearCanvas(existingShapes,canvas,ctx)
@@ -89,6 +90,7 @@ function clearCanvas(existingShapes:Shape[],canvas:HTMLCanvasElement,ctx:CanvasR
             ctx.lineWidth=2;
             ctx.strokeRect(shape.x,shape.y,shape.width,shape.height)
         }
+        
     })
 }
 
