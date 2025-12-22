@@ -2,8 +2,9 @@ import { initDraw } from "@/draw";
 import { useEffect, useRef, useState } from "react";
 import { IconButton } from "./Icon";
 import { Circle, Pencil, Square } from "lucide-react";
+import { Game } from "@/draw/Game";
 
-type Shape='circle' | 'rect' | 'pencil' | 'x'
+export type Tool='circle' | 'rect' | 'pencil'
 
 export function Canvas({
     roomId,
@@ -13,15 +14,35 @@ export function Canvas({
     roomId:string
 }){
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [selectedTool,setSelectedTool]=useState<Shape>('x')
+    const [selectedTool,setSelectedTool]=useState<Tool>('circle');
+    const [game,setGame] = useState<Game>()
 
     useEffect(()=>{
+        game?.setTool(selectedTool);
+    },[selectedTool,game])
 
-        if(canvasRef.current){
-            initDraw(canvasRef.current,roomId,socket);
+    // useEffect(()=>{
+
+    //     if(canvasRef.current){
+    //         initDraw(canvasRef.current,roomId,socket);
+    //     }
+
+    // },[canvasRef]);
+
+
+    useEffect(() => {
+
+        if (canvasRef.current) {
+            const g = new Game(canvasRef.current, roomId, socket);
+            setGame(g);
+
+            return () => {
+                g.destroy();
+            }
         }
 
-    },[canvasRef]);
+
+    }, [canvasRef]);
 
     return <div style={{
         height:"100vh",
@@ -35,8 +56,8 @@ export function Canvas({
 }
 
 function Topbar({selectedTool,setSelectedTool}:{
-    selectedTool:Shape,
-    setSelectedTool:(s:Shape) => void
+    selectedTool:Tool,
+    setSelectedTool:(s:Tool) => void
 }){
 
     return  <div style={{
