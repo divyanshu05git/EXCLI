@@ -14,11 +14,13 @@ type Shape = {
     radius: number;
 } | {
     type: "pencil";
-    // startX: number;
-    // startY: number;
-    // endX: number;
-    // endY: number;
     points:{x:number;y:number}[];
+} | {
+    type:"arrow"
+    startX:number
+    startY:number
+    endX:number
+    endY:number
 }
 
 export class Game {
@@ -55,7 +57,7 @@ export class Game {
         this.canvas.removeEventListener("mousemove", this.mouseMoveHandler)
     }
 
-    setTool(tool: "circle" | "pencil" | "rect") {
+    setTool(tool: "circle" | "pencil" | "rect" | "arrow") {
         this.selectedTool = tool;
     }
 
@@ -97,8 +99,7 @@ export class Game {
             }
 
 
-
-            else if(shape.type == "pencil"){
+            else if(shape.type === "pencil"){
                 this.ctx.strokeStyle="rgba(255,255,255)";
                 this.ctx.lineWidth=2;
                 this.ctx.lineCap="round";
@@ -111,6 +112,34 @@ export class Game {
                 for (let i = 1; i < pts.length; i++) {
                     this.ctx.lineTo(pts[i].x, pts[i].y);
                 }
+
+                this.ctx.stroke();
+            }
+
+            else if(shape.type === "arrow"){
+                this.ctx.strokeStyle="rgba(255,255,255)";
+                this.ctx.lineWidth=2;
+                this.ctx.lineCap="round";
+                this.ctx.lineJoin="round";
+
+                const headLength=12;
+                const angle = Math.atan2(shape.endY-shape.startY,shape.endX-shape.startX);
+
+                this.ctx.beginPath();
+
+                this.ctx.moveTo(shape.startX, shape.startY);
+                this.ctx.lineTo(shape.endX, shape.endY);
+
+                this.ctx.lineTo(
+                    shape.endX - headLength * Math.cos(angle - Math.PI / 6),
+                    shape.endY - headLength * Math.sin(angle - Math.PI / 6)
+                );
+
+                this.ctx.moveTo(shape.endX, shape.endY);
+                this.ctx.lineTo(
+                    shape.endX - headLength * Math.cos(angle + Math.PI / 6),
+                    shape.endY - headLength * Math.sin(angle + Math.PI / 6)
+                );
 
                 this.ctx.stroke();
             }
@@ -128,6 +157,8 @@ export class Game {
                 y:this.startY
             }]
         }
+
+
     }
 
     mouseUpHandler = (e) => {
@@ -135,6 +166,8 @@ export class Game {
         const width = e.clientX - this.startX;
         const height = e.clientY - this.startY;
         const selectedTool = this.selectedTool;
+        const endX=e.clientX;
+        const endY=e.clientY;
         let shape: Shape | null = null;
 
         if (selectedTool === "rect") {
@@ -166,6 +199,16 @@ export class Game {
                 points:this.pencilPoints
             };
             this.pencilPoints=[];
+        }
+
+        else if(selectedTool === "arrow"){
+            shape={
+                type:"arrow",
+                startX:this.startX,
+                startY:this.startY,
+                endX:endX,
+                endY:endY
+            }
         }
         
 
@@ -227,10 +270,42 @@ export class Game {
                 }
 
                 this.ctx.stroke();
-                return;
             }
+
+            else if(selectedTool === "arrow"){
+                const endX=e.clientX;
+                const endY=e.clientY;
+
+                const headLength=12;
+                const angle = Math.atan2(endY -this.startY,endX-this.startX);
+
+                this.ctx.beginPath();
+
+                this.ctx.moveTo(this.startX,this.startY);
+                this.ctx.lineTo(endX,endY);
+
+                //left arrrow
+                this.ctx.lineTo(
+                    endX-headLength*Math.cos(angle-Math.PI/6),
+                    endY-headLength*Math.sin(angle-Math.PI/6)
+                )
+
+                //move back to end
+                this.ctx.moveTo(endX,endY)
+
+                //right arrow
+                this.ctx.lineTo(
+                    endX-headLength*Math.cos(angle+Math.PI/6),
+                    endY-headLength*Math.sin(angle+Math.PI/6)
+                )
+
+                this.ctx.stroke();
+
+            }
+
         }
     }
+
 
     initMouseHandlers() {
         this.canvas.addEventListener("mousedown", this.mouseDownHandler)

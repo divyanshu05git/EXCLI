@@ -1,10 +1,10 @@
 import { initDraw } from "@/draw";
 import { useEffect, useRef, useState } from "react";
 import { IconButton } from "./Icon";
-import { Circle, Pencil, Square } from "lucide-react";
+import { Circle, Eraser, Pencil, Square ,ArrowRight } from "lucide-react";
 import { Game } from "@/draw/Game";
 
-export type Tool='circle' | 'rect' | 'pencil'
+export type Tool='circle' | 'rect' | 'pencil' | 'arrow'
 
 export function Canvas({
     roomId,
@@ -20,14 +20,6 @@ export function Canvas({
     useEffect(()=>{
         game?.setTool(selectedTool);
     },[selectedTool,game])
-
-    // useEffect(()=>{
-
-    //     if(canvasRef.current){
-    //         initDraw(canvasRef.current,roomId,socket);
-    //     }
-
-    // },[canvasRef]);
 
 
     useEffect(() => {
@@ -69,6 +61,7 @@ function Topbar({selectedTool,setSelectedTool}:{
             <IconButton active={selectedTool=='pencil'} icon={<Pencil/>} onClick={()=>{setSelectedTool('pencil')}} ></IconButton>
             <IconButton active={selectedTool=='rect'} icon={<Square/>} onClick={()=>{setSelectedTool('rect')}}></IconButton>
             <IconButton active={selectedTool=='circle'} icon={<Circle/>} onClick={()=>{setSelectedTool('circle')}}></IconButton>
+            <IconButton active={selectedTool=='arrow'} icon={<ArrowRight/>} onClick={()=>{setSelectedTool('arrow')}}></IconButton>
         </div>
         
     </div>
