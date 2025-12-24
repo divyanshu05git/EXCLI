@@ -27,6 +27,11 @@ type Shape = {
     centerY:number
     width:number
     height:number
+} | {
+    type:"write"
+    x:number
+    y:number
+    text:string
 }
 
 export class Game {
@@ -40,6 +45,11 @@ export class Game {
     private startY = 0;
     private selectedTool: Tool = "circle";
     private pencilPoints:{x:number;y:number}[]=[];
+    private isTyping=false;
+    private currentText="";
+    private textX=0
+    private textY=0
+    private showCursor=false;
 
     socket: WebSocket;
 
@@ -53,6 +63,7 @@ export class Game {
         this.init();
         this.initHandlers();
         this.initMouseHandlers();
+        this.initKeyboardHandlers();
     }
     
     destroy() {
@@ -61,15 +72,23 @@ export class Game {
         this.canvas.removeEventListener("mouseup", this.mouseUpHandler)
 
         this.canvas.removeEventListener("mousemove", this.mouseMoveHandler)
+
+        window.removeEventListener("keydown",this.keyDownHandler)
     }
 
-    setTool(tool: "circle" | "pencil" | "rect" | "arrow" | "rhombus") {
+    setTool(tool: "circle" | "pencil" | "rect" | "arrow" | "rhombus" | "write") {
         this.selectedTool = tool;
     }
 
     async init() {
         this.existingShapes = await getExistingShapes(this.roomId);
         console.log(this.existingShapes);
+        setInterval(() => {
+            if (this.isTyping) {
+                this.showCursor=!this.showCursor;
+                this.clearCanvas()
+            }
+        }, 500);
         this.clearCanvas();
     }
 
@@ -159,6 +178,31 @@ export class Game {
                 this.ctx.closePath();
                 this.ctx.stroke();
             }
+
+            else if(shape.type === "write"){
+                this.ctx.fillStyle = "white";
+                this.ctx.font=`16px Inter , sans-serif`
+                this.ctx.fillText(shape.text,shape.x,shape.y);
+            }
+
+            if (this.isTyping && this.selectedTool === "write") {
+                this.ctx.fillStyle = "white";
+                this.ctx.font = "16px Inter, sans-serif";
+                this.ctx.fillText(this.currentText, this.textX, this.textY);
+
+                if (this.showCursor) {
+                    const metrics = this.ctx.measureText(this.currentText);
+                    const caretX = this.textX + metrics.width;
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(caretX, this.textY - 14);
+                    this.ctx.lineTo(caretX, this.textY + 4);
+                    this.ctx.strokeStyle = "white";
+                    this.ctx.lineWidth = 1;
+                    this.ctx.stroke();
+                }
+            }
+
         })
     }
 
@@ -172,6 +216,13 @@ export class Game {
                 x:this.startX,
                 y:this.startY
             }]
+        }
+
+        if(this.selectedTool === "write"){
+            this.isTyping=true;
+            this.currentText="";
+            this.textX=this.startX;
+            this.textY=this.startY;
         }
 
 
@@ -351,6 +402,48 @@ export class Game {
         }
     }
 
+    keyDownHandler =(e)=> {
+        if(!this.isTyping) return;
+
+        if(this.selectedTool !== "write") return;
+
+        if(e.key === 'Enter'){
+            const shape={
+                type:"write",
+                x:this.textX,
+                y:this.textY,
+                text:this.currentText
+            }
+
+            if(!shape) return ;
+
+            this.existingShapes.push(shape);
+            this.isTyping=false;
+
+            this.socket.send(
+                JSON.stringify({
+                    type:"chat",
+                    message: JSON.stringify({shape}),
+                    roomId:this.roomId
+                })
+            )
+
+            this.clearCanvas();
+            return ;
+
+        }
+
+        if(e.key === "Backspace"){
+            this.currentText=this.currentText.slice(0,-1);
+        }
+        else if(e.key.length === 1){
+            this.currentText+=e.key;
+        }
+
+        this.clearCanvas();
+        
+    }
+
 
     initMouseHandlers() {
         this.canvas.addEventListener("mousedown", this.mouseDownHandler)
@@ -359,5 +452,9 @@ export class Game {
 
         this.canvas.addEventListener("mousemove", this.mouseMoveHandler)    
 
+    }
+
+    initKeyboardHandlers(){
+        window.addEventListener("keydown",this.keyDownHandler)
     }
 }
