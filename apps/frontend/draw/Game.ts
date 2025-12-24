@@ -21,6 +21,12 @@ type Shape = {
     startY:number
     endX:number
     endY:number
+} | {
+    type:"rhombus"
+    centerX:number
+    centerY:number
+    width:number
+    height:number
 }
 
 export class Game {
@@ -57,7 +63,7 @@ export class Game {
         this.canvas.removeEventListener("mousemove", this.mouseMoveHandler)
     }
 
-    setTool(tool: "circle" | "pencil" | "rect" | "arrow") {
+    setTool(tool: "circle" | "pencil" | "rect" | "arrow" | "rhombus") {
         this.selectedTool = tool;
     }
 
@@ -143,6 +149,16 @@ export class Game {
 
                 this.ctx.stroke();
             }
+
+            else if (shape.type === "rhombus") {
+                this.ctx.beginPath();
+                this.ctx.moveTo(shape.centerX, shape.centerY - shape.height / 2);
+                this.ctx.lineTo(shape.centerX + shape.width / 2, shape.centerY);
+                this.ctx.lineTo(shape.centerX, shape.centerY + shape.height / 2);
+                this.ctx.lineTo(shape.centerX - shape.width / 2, shape.centerY);
+                this.ctx.closePath();
+                this.ctx.stroke();
+            }
         })
     }
 
@@ -209,6 +225,16 @@ export class Game {
                 endX:endX,
                 endY:endY
             }
+        }
+
+        else if(selectedTool === "rhombus"){
+            shape = {
+                type: "rhombus",
+                centerX: (this.startX + endX) / 2,
+                centerY: (this.startY + endY) / 2,
+                width: Math.abs(endX - this.startX),
+                height: Math.abs(endY - this.startY),
+            };
         }
         
 
@@ -301,6 +327,25 @@ export class Game {
 
                 this.ctx.stroke();
 
+            }
+
+            else if(selectedTool=='rhombus'){
+                const endX=e.clientX
+                const endY=e.clientY
+
+                const  centerX=(this.startX + endX)/2
+                const  centerY=(this.startY + endY)/2
+
+                const width = Math.abs(endX-this.startX);
+                const height = Math.abs(endY-this.startY);
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(centerX,centerY-height/2);
+                this.ctx.lineTo(centerX+width/2,centerY);
+                this.ctx.lineTo(centerX, centerY + height / 2); 
+                this.ctx.lineTo(centerX - width / 2, centerY); 
+                this.ctx.closePath();
+                this.ctx.stroke();
             }
 
         }
