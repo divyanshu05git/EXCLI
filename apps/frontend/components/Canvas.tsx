@@ -1,15 +1,15 @@
-import { initDraw } from "@/draw";
+
 import { useEffect, useRef, useState } from "react";
 import { IconButton } from "./Icon";
 import { Circle, Eraser, Pencil, Square ,ArrowRight, Diamond , Type } from "lucide-react";
 import { Game } from "@/draw/Game";
 
-export type Tool='circle' | 'rect' | 'pencil' | 'arrow' | 'rhombus' | 'write'
+export type Tool='circle' | 'rect' | 'pencil' | 'arrow' | 'rhombus' | 'write' ;
 
 export function Canvas({
     roomId,
     socket
-}:{
+}:{ 
     socket:WebSocket
     roomId:string
 }){
