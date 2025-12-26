@@ -29,8 +29,17 @@ app.post("/signup",async (req,res)=>{
                 name: parsedData.data.name
             }
         })
+
+        const room=await prismaClient.room.create({
+            data:{
+                slug:`${user.name}-room`,
+                adminId:user.id
+            }
+        })
+
         res.json({
-            userId:user.id
+            userId:user.id,
+            roomId:room.id
         })
     }
     catch(err){
@@ -70,8 +79,18 @@ app.post("/signin",async (req,res)=>{
             userId:user?.id
         },JWT_SECRET)
 
+        const lastRoom=await prismaClient.room.findFirst({
+            where:{
+                adminId:user?.id
+            },
+            orderBy:{
+                id:"desc"
+            }
+        })
+
         res.json({
-            token
+            token,
+            roomId:lastRoom?.id
         })
     }
     catch(err){

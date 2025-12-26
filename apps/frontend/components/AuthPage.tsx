@@ -41,12 +41,14 @@ export function AuthPage({
         const password=passwordRef.current?.value;
 
         try{
-            await axios.post(HTTP_BACKEND+"/signin",{
+            const res=await axios.post(HTTP_BACKEND+"/signin",{
                 username:username,
                 password:password
             })
             alert("Signin successful!")
-            router.push("/canvas/1")
+
+            const roomId=res.data.roomId
+            router.push(`/canvas/${roomId}`)
         }
         catch(err){
             alert("Error signing in")
