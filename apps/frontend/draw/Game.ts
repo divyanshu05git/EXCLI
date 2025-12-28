@@ -32,6 +32,12 @@ type Shape = {
     x:number
     y:number
     text:string
+} | {
+    type:'line'
+    startX:number
+    startY:number
+    endX:number
+    endY:number
 }
 
 export class Game {
